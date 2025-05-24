@@ -13,7 +13,14 @@ class BaseCore(ABC):
             'sadness': 0.5,
             'anger': 0.5,
             'fear': 0.5,
-            'trust': 0.5
+            'trust': 0.5,
+            'disgust': 0.5,
+            'surprise': 0.5,
+            'love': 0.5,
+            'contentment': 0.5,
+            'acceptance': 0.5,
+            'calmness': 0.5,
+            'anxiety': 0.5,
         }
         self.creation_date = datetime.now()
         self.evolution_level = 0.0
