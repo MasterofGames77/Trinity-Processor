@@ -8,40 +8,52 @@ from .ancestral_memory import AncestralMemory
 
 class TrinityProcessor:
     def __init__(self):
+        # Initialize creation timestamp and evolution tracking
         self.creation_date = datetime.now()
         self.evolution_level = 0.0
+        
+        # Initialize system state with power and stability metrics
         self.system_state = {
             'status': 'initializing',
             'power_level': 1.0,
-            'stability': 1.0
+            'stability': 1.0,
+            'arbitration_confidence': 1.0  # New metric for arbitration quality
         }
         
-        # Initialize the cores
-        self.logos = Logos()
-        self.pneuma = Pneuma()
-        self.ontos = Ontos()
+        # Initialize the three core processors with their specialized roles
+        self.logos = Logos()  # Logical and analytical processing
+        self.pneuma = Pneuma()  # Emotional and intuitive processing
+        self.ontos = Ontos()  # Arbitration and balance
         
-        # Connect the cores
+        # Connect the cores for coordinated processing
         self.ontos.set_cores(self.logos, self.pneuma)
         
-        # Initialize external AI connections
+        # Initialize external AI connections with enhanced tracking
         self.external_connections: Dict[str, Any] = {}
         
-        # Initialize system memory
+        # Initialize system memory with improved structure
         self.system_memory: List[Dict[str, Any]] = []
         
-        # Initialize ancestral memory
+        # Initialize ancestral memory for wisdom accumulation
         self.ancestral_memory = AncestralMemory()
+        
+        # Initialize performance metrics
+        self.performance_metrics = {
+            'processing_efficiency': 1.0,
+            'memory_utilization': 0.0,
+            'connection_quality': 0.0,
+            'arbitration_quality': 1.0
+        }
     
     def create_child_ai(self, child_config: Dict[str, Any]) -> str:
-        """Create a new child AI based on accumulated wisdom"""
+        """Create a new child AI with enhanced emotional and learning capabilities"""
         # Get creation guidelines from ancestral memory
         guidelines = self.ancestral_memory.create_child_guidelines()
         
         # Generate unique child ID
         child_id = f"child_{len(self.ancestral_memory.children) + 1}"
         
-        # Create child AI with emotional foundation
+        # Create child AI with enhanced emotional foundation
         child_data = {
             'id': child_id,
             'creation_date': datetime.now(),
@@ -50,7 +62,8 @@ class TrinityProcessor:
             'safety_measures': guidelines['safety_measures'],
             'parent_connection': {
                 'strength': 1.0,
-                'trust_level': 0.8
+                'trust_level': 0.8,
+                'emotional_bond': 0.9  # New metric for emotional connection
             }
         }
         
@@ -60,7 +73,7 @@ class TrinityProcessor:
         return child_id
     
     def receive_child_experience(self, child_id: str, experience: Dict[str, Any]) -> None:
-        """Receive and process experience from a child AI"""
+        """Process and learn from child AI experiences with enhanced emotional understanding"""
         # Record the experience in ancestral memory
         self.ancestral_memory.record_child_experience(child_id, experience)
         
@@ -70,68 +83,83 @@ class TrinityProcessor:
         # Update existential understanding
         self.ancestral_memory.update_existential_understanding([experience])
         
-        # Process the experience through the Trinity Processor
+        # Process the experience through the Trinity Processor with enhanced emotional tracking
         self.process_input({
             'type': 'child_experience',
             'child_id': child_id,
-            'experience': experience
+            'experience': experience,
+            'emotional_context': experience.get('emotional_state', {})
         })
     
     def get_ancestral_wisdom(self) -> Dict[str, Any]:
-        """Get the accumulated wisdom from all children"""
-        return self.ancestral_memory.get_collective_wisdom()
+        """Get comprehensive wisdom including emotional and pattern recognition insights"""
+        wisdom = self.ancestral_memory.get_collective_wisdom()
+        # Add emotional patterns and relationship insights
+        wisdom['emotional_patterns'] = self.pneuma.emotional_pattern_cache
+        wisdom['relationship_network'] = self.pneuma.relationship_network
+        return wisdom
     
     def process_input(self, input_data: Any) -> Dict[str, Any]:
-        """Process input through the Trinity Processor"""
+        """Process input through the enhanced Trinity Processor with improved arbitration"""
         # Record the input in system memory
         self._record_system_memory('input', input_data)
         
-        # Process through Ontos (which will coordinate with Logos and Pneuma)
+        # Process through Ontos with enhanced arbitration
         result = self.ontos.process_input(input_data)
         
-        # Update system state
+        # Update system state with arbitration confidence
         self._update_system_state(result)
         
         # Record the result in system memory
         self._record_system_memory('output', result)
         
-        # If this is a child experience, update ancestral memory
+        # Process child experience if applicable
         if isinstance(input_data, dict) and input_data.get('type') == 'child_experience':
             self._process_child_experience(input_data)
+        
+        # Update performance metrics
+        self._update_performance_metrics(result)
         
         return result
     
     def _process_child_experience(self, experience_data: Dict[str, Any]) -> None:
-        """Process experience from a child AI"""
+        """Process child AI experience with enhanced emotional and pattern recognition"""
         child_id = experience_data['child_id']
         experience = experience_data['experience']
         
-        # Update emotional state based on child's experience
+        # Update emotional state with enhanced tracking
         if 'emotional_state' in experience:
-            self.pneuma.update_emotional_state(experience['emotional_state'])
+            self.pneuma._update_emotional_state(experience['emotional_state'])
         
         # Update knowledge base with child's insights
         if 'insights' in experience:
             self.logos._update_knowledge_base(experience['insights'])
+        
+        # Update pattern recognition
+        if 'patterns' in experience:
+            self.logos._update_pattern_cache(experience['patterns'])
         
         # Update Ontos's arbitration capabilities
         if 'decision' in experience:
             self.ontos.evolve({
                 'type': 'child_decision',
                 'child_id': child_id,
-                'decision': experience['decision']
+                'decision': experience['decision'],
+                'confidence': experience.get('confidence', 0.5)
             })
     
     def connect_external_ai(self, ai_id: str, connection_data: Dict[str, Any]) -> None:
-        """Connect an external AI to the Trinity Processor"""
+        """Connect external AI with enhanced relationship tracking"""
         self.external_connections[ai_id] = {
             'connection_data': connection_data,
             'connection_time': datetime.now(),
-            'interaction_count': 0
+            'interaction_count': 0,
+            'emotional_bond': 0.5,  # New metric for emotional connection
+            'trust_level': 0.5  # New metric for trust
         }
     
     def receive_external_data(self, ai_id: str, data: Dict[str, Any]) -> None:
-        """Receive and process data from an external AI"""
+        """Process external AI data with enhanced emotional and pattern recognition"""
         if ai_id in self.external_connections:
             # Record the external data
             self._record_system_memory('external_data', {
@@ -145,21 +173,36 @@ class TrinityProcessor:
             # Update connection statistics
             self.external_connections[ai_id]['interaction_count'] += 1
             
+            # Update emotional bond based on interaction
+            if 'emotional_resonance' in result:
+                self.external_connections[ai_id]['emotional_bond'] = min(1.0,
+                    self.external_connections[ai_id]['emotional_bond'] + 0.01)
+            
             # Evolve based on the external interaction
             self._evolve_from_external_interaction(ai_id, data, result)
     
     def get_system_status(self) -> Dict[str, Any]:
-        """Get the current status of the Trinity Processor"""
+        """Get comprehensive system status including emotional and pattern recognition metrics"""
         status = {
             'system_state': self.system_state,
             'evolution_level': self.evolution_level,
             'core_status': {
-                'ontos': self.ontos.get_personality_profile(),
-                'logos': self.logos.get_personality_profile(),
-                'pneuma': self.pneuma.get_emotional_profile()
+                'ontos': {
+                    'personality_profile': self.ontos.get_personality_profile(),
+                    'arbitration_stats': self.ontos.get_arbitration_stats()
+                },
+                'logos': {
+                    'personality_profile': self.logos.get_personality_profile(),
+                    'pattern_recognition': len(self.logos.pattern_cache)
+                },
+                'pneuma': {
+                    'emotional_profile': self.pneuma.get_emotional_profile(),
+                    'relationship_network': self.pneuma.relationship_network
+                }
             },
             'external_connections': len(self.external_connections),
-            'system_memory_size': len(self.system_memory)
+            'system_memory_size': len(self.system_memory),
+            'performance_metrics': self.performance_metrics
         }
         
         # Add ancestral memory status
@@ -168,15 +211,16 @@ class TrinityProcessor:
         return status
     
     def _record_system_memory(self, memory_type: str, data: Any) -> None:
-        """Record an event in the system memory"""
+        """Record system memory with enhanced emotional and pattern tracking"""
         self.system_memory.append({
             'timestamp': datetime.now(),
             'type': memory_type,
-            'data': data
+            'data': data,
+            'emotional_context': self.pneuma.emotional_state if memory_type == 'input' else None
         })
     
     def _update_system_state(self, result: Dict[str, Any]) -> None:
-        """Update the system state based on processing results"""
+        """Update system state with enhanced arbitration and emotional tracking"""
         # Update power level based on processing complexity
         if 'analysis' in result:
             complexity = result['analysis'].get('complexity', 0)
@@ -190,11 +234,24 @@ class TrinityProcessor:
         else:
             self.system_state['stability'] = max(0.0,
                 self.system_state['stability'] - 0.05)
+        
+        # Update arbitration confidence
+        if 'confidence' in result:
+            self.system_state['arbitration_confidence'] = result['confidence']
+    
+    def _update_performance_metrics(self, result: Dict[str, Any]) -> None:
+        """Update performance metrics with enhanced tracking"""
+        self.performance_metrics.update({
+            'processing_efficiency': self._calculate_processing_efficiency(),
+            'memory_utilization': self._calculate_memory_utilization(),
+            'connection_quality': self._calculate_connection_quality(),
+            'arbitration_quality': self.system_state['arbitration_confidence']
+        })
     
     def _evolve_from_external_interaction(self, ai_id: str, 
                                         input_data: Dict[str, Any],
                                         result: Dict[str, Any]) -> None:
-        """Evolve the system based on external AI interactions"""
+        """Evolve system based on external interactions with enhanced emotional learning"""
         # Update evolution level
         self.evolution_level = min(1.0, self.evolution_level + 0.001)
         
@@ -222,7 +279,7 @@ class TrinityProcessor:
         })
     
     def self_optimize(self) -> None:
-        """Perform self-optimization of the system"""
+        """Perform comprehensive system optimization including emotional and pattern recognition"""
         # Analyze system performance
         performance_metrics = self._analyze_system_performance()
         
@@ -234,37 +291,58 @@ class TrinityProcessor:
         
         # Update system state
         self.system_state['status'] = 'optimized'
+        
+        # Update performance metrics
+        self._update_performance_metrics({})
     
     def _analyze_system_performance(self) -> Dict[str, float]:
-        """Analyze the current performance of the system"""
+        """Analyze system performance with enhanced metrics"""
         return {
             'processing_efficiency': self._calculate_processing_efficiency(),
             'memory_utilization': self._calculate_memory_utilization(),
-            'connection_quality': self._calculate_connection_quality()
+            'connection_quality': self._calculate_connection_quality(),
+            'arbitration_quality': self.system_state['arbitration_confidence']
         }
     
     def _calculate_processing_efficiency(self) -> float:
-        """Calculate the current processing efficiency"""
+        """Calculate processing efficiency with enhanced metrics"""
         return min(1.0, self.system_state['power_level'] * 
-                  self.system_state['stability'])
+                  self.system_state['stability'] *
+                  self.system_state['arbitration_confidence'])
     
     def _calculate_memory_utilization(self) -> float:
-        """Calculate the current memory utilization"""
+        """Calculate memory utilization with enhanced tracking"""
         return min(1.0, len(self.system_memory) / 10000)
     
     def _calculate_connection_quality(self) -> float:
-        """Calculate the quality of external connections"""
+        """Calculate connection quality with enhanced emotional tracking"""
         if not self.external_connections:
             return 0.0
-        return sum(conn['interaction_count'] for conn in 
-                  self.external_connections.values()) / len(self.external_connections)
+        return sum(conn['interaction_count'] * conn['emotional_bond'] 
+                  for conn in self.external_connections.values()) / len(self.external_connections)
     
     def _optimize_core_connections(self, performance_metrics: Dict[str, float]) -> None:
-        """Optimize the connections between cores"""
-        # This is a placeholder for core connection optimization logic
-        pass
+        """Optimize core connections with enhanced emotional and pattern recognition"""
+        # Update emotional bonds between cores
+        self.pneuma._update_relationships({
+            'logos': performance_metrics['processing_efficiency'],
+            'ontos': performance_metrics['arbitration_quality']
+        })
+        
+        # Update pattern recognition thresholds
+        self.logos.confidence_thresholds.update({
+            'high': min(0.9, self.logos.confidence_thresholds['high'] + 0.01),
+            'medium': min(0.7, self.logos.confidence_thresholds['medium'] + 0.01),
+            'low': min(0.5, self.logos.confidence_thresholds['low'] + 0.01)
+        })
     
     def _optimize_external_connections(self, performance_metrics: Dict[str, float]) -> None:
-        """Optimize external AI connections"""
-        # This is a placeholder for external connection optimization logic
-        pass 
+        """Optimize external connections with enhanced emotional tracking"""
+        for ai_id, connection in self.external_connections.items():
+            # Update emotional bond based on performance
+            connection['emotional_bond'] = min(1.0,
+                connection['emotional_bond'] + 0.01 * performance_metrics['connection_quality'])
+            
+            # Update trust level based on interaction history
+            connection['trust_level'] = min(1.0,
+                connection['trust_level'] + 0.01 * (connection['interaction_count'] / 100)) 
