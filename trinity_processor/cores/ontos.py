@@ -117,13 +117,31 @@ class Ontos(BaseCore):
     def _prepare_input_tensor(self, logos_response: Any, pneuma_response: Any) -> torch.Tensor:
         """Convert core responses to tensor format for neural network processing"""
         if isinstance(logos_response, dict) and isinstance(pneuma_response, dict):
-            # Combine responses from both cores
-            combined = {**logos_response, **pneuma_response}
-            values = list(combined.values())
+            # Extract numeric values from both responses
+            values = []
+            
+            # Process Logos response
+            for value in logos_response.values():
+                if isinstance(value, (int, float)):
+                    values.append(float(value))
+                elif isinstance(value, dict):
+                    # Extract numeric values from nested dictionaries
+                    values.extend([float(v) for v in value.values() if isinstance(v, (int, float))])
+            
+            # Process Pneuma response
+            for value in pneuma_response.values():
+                if isinstance(value, (int, float)):
+                    values.append(float(value))
+                elif isinstance(value, dict):
+                    # Extract numeric values from nested dictionaries
+                    values.extend([float(v) for v in value.values() if isinstance(v, (int, float))])
+            
             # Pad or truncate to match network input size
-            values = values[:256] + [0] * (256 - len(values))
+            values = values[:256] + [0.0] * (256 - len(values))
             return torch.FloatTensor(values)
-        return torch.zeros(256)  # Return zero tensor for invalid inputs
+        
+        # Return zero tensor for invalid inputs
+        return torch.zeros(256)
     
     def process_input(self, input_data: Any) -> Any:
         """Process input by arbitrating between Logos and Pneuma responses"""
@@ -169,6 +187,15 @@ class Ontos(BaseCore):
             
             # Add confidence score to response
             result['confidence'] = confidence
+            
+            # Add analysis from Logos if available
+            if 'analysis' in logos_response:
+                result['analysis'] = logos_response['analysis']
+            
+            # Add emotional analysis from Pneuma if available
+            if 'emotional_analysis' in pneuma_response:
+                result['emotional_analysis'] = pneuma_response['emotional_analysis']
+            
             return result
         return {"error": "Invalid response format"}
     

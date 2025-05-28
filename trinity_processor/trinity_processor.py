@@ -222,13 +222,13 @@ class TrinityProcessor:
     def _update_system_state(self, result: Dict[str, Any]) -> None:
         """Update system state with enhanced arbitration and emotional tracking"""
         # Update power level based on processing complexity
-        if 'analysis' in result:
+        if isinstance(result, dict) and 'analysis' in result:
             complexity = result['analysis'].get('complexity', 0)
             self.system_state['power_level'] = max(0.0, 
                 self.system_state['power_level'] - 0.01 * complexity)
         
         # Update stability based on processing success
-        if 'error' not in result:
+        if isinstance(result, dict) and 'error' not in result:
             self.system_state['stability'] = min(1.0,
                 self.system_state['stability'] + 0.01)
         else:
@@ -236,7 +236,7 @@ class TrinityProcessor:
                 self.system_state['stability'] - 0.05)
         
         # Update arbitration confidence
-        if 'confidence' in result:
+        if isinstance(result, dict) and 'confidence' in result:
             self.system_state['arbitration_confidence'] = result['confidence']
     
     def _update_performance_metrics(self, result: Dict[str, Any]) -> None:
