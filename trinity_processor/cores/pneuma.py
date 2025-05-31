@@ -1,7 +1,92 @@
 from typing import Dict, Any, List, Optional
 import numpy as np
 from datetime import datetime
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from .base_core import BaseCore
+
+class EmotionalAttentionLayer(nn.Module):
+    def __init__(self, input_size: int):
+        super().__init__()
+        # Initialize multi-head attention with 4 parallel attention heads
+        self.attention = nn.MultiheadAttention(input_size, num_heads=4)
+        # Layer normalization for stabilizing the attention outputs
+        self.norm = nn.LayerNorm(input_size)
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Add sequence dimension required for attention mechanism
+        x = x.unsqueeze(0)
+        # Apply self-attention to capture emotional relationships
+        attn_output, _ = self.attention(x, x, x)
+        # Normalize and remove sequence dimension
+        return self.norm(attn_output.squeeze(0))
+
+class EmotionalProcessingNetwork(nn.Module):
+    def __init__(self, input_size: int, hidden_size: int = 128):
+        super().__init__()
+        # Initialize attention layer for focusing on emotional features
+        self.attention = EmotionalAttentionLayer(input_size)
+        
+        # LSTM layer for processing emotional sequences
+        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
+        
+        # Neural network head for emotional intensity
+        self.intensity_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, input_size)
+        )
+        
+        # Neural network head for emotional valence
+        self.valence_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, input_size)
+        )
+        
+        # Neural network head for emotional complexity
+        self.complexity_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, input_size)
+        )
+        
+        # Neural network head for emotional resonance
+        self.resonance_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, 1),
+            nn.Sigmoid()  # Output resonance between 0 and 1
+        )
+        
+        # Layer to combine outputs from all specialized heads
+        self.combine_heads = nn.Linear(input_size * 3, input_size)
+        
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        # Apply attention mechanism to focus on emotional features
+        x = self.attention(x)
+        
+        # Prepare input for LSTM by adding sequence dimension
+        x = x.unsqueeze(0)
+        # Process through LSTM to capture emotional patterns
+        lstm_out, _ = self.lstm(x)
+        x = lstm_out.squeeze(0)
+        
+        # Process input through each specialized head
+        intensity_out = self.intensity_head(x)  # Get emotional intensity
+        valence_out = self.valence_head(x)  # Get emotional valence
+        complexity_out = self.complexity_head(x)  # Get emotional complexity
+        
+        # Concatenate and combine outputs from all heads
+        combined = torch.cat([intensity_out, valence_out, complexity_out], dim=-1)
+        output = self.combine_heads(combined)
+        
+        # Calculate emotional resonance score
+        resonance = self.resonance_head(x)
+        
+        # Return both the emotional processing result and resonance score
+        return torch.sigmoid(output), resonance
 
 class Pneuma(BaseCore):
     def __init__(self):
@@ -29,9 +114,42 @@ class Pneuma(BaseCore):
             'moderate': 0.6,
             'mild': 0.4
         }
+        
+        # Initialize the neural network for emotional processing
+        self.emotional_network = EmotionalProcessingNetwork(input_size=256)
+        # Adam optimizer for training the network
+        self.optimizer = torch.optim.Adam(self.emotional_network.parameters())
+    
+    def _prepare_input_tensor(self, input_data: Any) -> torch.Tensor:
+        """Convert input data to tensor format for neural network processing"""
+        if isinstance(input_data, dict):
+            # Extract numeric values from input
+            values = []
+            
+            # Process input values
+            for value in input_data.values():
+                if isinstance(value, (int, float)):
+                    values.append(float(value))
+                elif isinstance(value, dict):
+                    # Extract numeric values from nested dictionaries
+                    values.extend([float(v) for v in value.values() if isinstance(v, (int, float))])
+            
+            # Pad or truncate to match network input size
+            values = values[:256] + [0.0] * (256 - len(values))
+            return torch.FloatTensor(values)
+        
+        # Return zero tensor for invalid inputs
+        return torch.zeros(256)
     
     def process_input(self, input_data: Any) -> Any:
-        """Process input using emotional and intuitive methods"""
+        """Process input using emotional and intuitive methods with neural network enhancement"""
+        # Convert input to tensor format
+        input_tensor = self._prepare_input_tensor(input_data)
+        
+        # Get neural network prediction
+        with torch.no_grad():
+            emotional_tensor = self.emotional_network(input_tensor)
+        
         # Perform comprehensive emotional analysis
         emotional_analysis = self._analyze_emotional_content(input_data)
         
@@ -44,6 +162,9 @@ class Pneuma(BaseCore):
         # Calculate emotional resonance with other cores
         emotional_resonance = self._calculate_emotional_resonance(emotional_analysis)
         
+        # Convert tensor back to response format
+        neural_response = self._tensor_to_response(emotional_tensor, emotional_analysis)
+        
         # Record emotional experience with context
         self.emotional_memory.append({
             'timestamp': datetime.now(),
@@ -51,7 +172,8 @@ class Pneuma(BaseCore):
             'emotional_analysis': emotional_analysis,
             'emotional_patterns': emotional_patterns,
             'intuitive_response': intuitive_response,
-            'emotional_resonance': emotional_resonance
+            'emotional_resonance': emotional_resonance,
+            'neural_response': neural_response
         })
         
         return {
@@ -60,8 +182,33 @@ class Pneuma(BaseCore):
             'intuitive_response': intuitive_response,
             'emotional_resonance': emotional_resonance,
             'emotional_state': self.emotional_state,
-            'relationship_impact': self._calculate_relationship_impact(emotional_analysis)
+            'relationship_impact': self._calculate_relationship_impact(emotional_analysis),
+            'neural_processing': neural_response
         }
+    
+    def _tensor_to_response(self, tensor: torch.Tensor, emotional_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert neural network output tensor back to response format"""
+        if isinstance(emotional_analysis, dict):
+            result = {}
+            # Extract output values and resonance score
+            tensor_values = tensor[0].numpy()
+            resonance = float(tensor[1].numpy())
+            
+            # Map tensor values to emotional aspects
+            aspects = ['intensity', 'valence', 'complexity']
+            for i, aspect in enumerate(aspects):
+                if i < len(tensor_values):
+                    result[f'neural_{aspect}'] = float(tensor_values[i])
+            
+            # Add resonance score to response
+            result['emotional_resonance'] = resonance
+            
+            # Add emotional analysis if available
+            if 'emotional_analysis' in emotional_analysis:
+                result['emotional_analysis'] = emotional_analysis['emotional_analysis']
+            
+            return result
+        return {"error": "Invalid response format"}
     
     def _analyze_emotional_content(self, input_data: Any) -> Dict[str, Any]:
         """Perform comprehensive emotional analysis of input data"""
@@ -253,7 +400,7 @@ class Pneuma(BaseCore):
         }
     
     def evolve(self, experience: Dict[str, Any]) -> None:
-        """Evolve based on new experiences and emotional responses"""
+        """Evolve based on new experiences and emotional responses with neural network training"""
         if experience['type'] == 'communication':
             # Update emotional state with new information
             if 'emotional_analysis' in experience:
@@ -272,6 +419,9 @@ class Pneuma(BaseCore):
                 response = experience['intuitive_response']
                 if 'score' in response:
                     self._update_personality_traits(response['score'])
+            
+            # Train the neural network with new experience
+            self._train_network(experience)
         
         # Incrementally increase evolution level
         self.evolution_level = min(1.0, self.evolution_level + 0.001)
@@ -310,12 +460,41 @@ class Pneuma(BaseCore):
         self.personality_traits['sensitive'] = min(1.0,
             self.personality_traits['sensitive'] + 0.01 * confidence)
     
+    def _train_network(self, experience: Dict[str, Any]) -> None:
+        """Train the emotional processing network based on experience"""
+        if 'emotional_analysis' in experience and 'error' not in experience['emotional_analysis']:
+            # Prepare input tensor from experience
+            input_tensor = self._prepare_input_tensor(experience)
+            
+            # Prepare target tensor from emotional analysis
+            target_tensor = self._prepare_input_tensor(experience['emotional_analysis'])
+            
+            # Train the network
+            self.optimizer.zero_grad()
+            output, resonance = self.emotional_network(input_tensor)
+            
+            # Calculate losses for both output and resonance
+            output_loss = F.mse_loss(output, target_tensor)
+            resonance_loss = F.binary_cross_entropy(resonance, torch.tensor([1.0]))
+            
+            # Combine losses with resonance loss weighted less
+            total_loss = output_loss + 0.1 * resonance_loss
+            total_loss.backward()
+            self.optimizer.step()
+    
     def get_emotional_profile(self) -> Dict[str, Any]:
-        """Get comprehensive emotional profile"""
+        """Get comprehensive emotional profile with neural network statistics"""
         return {
             'emotional_state': self.emotional_state,
             'personality_traits': self.personality_traits,
             'emotional_memory_size': len(self.emotional_memory),
             'relationship_network': self.relationship_network,
-            'evolution_level': self.evolution_level
+            'evolution_level': self.evolution_level,
+            'neural_network_stats': {
+                'total_experiences': len(self.emotional_memory),
+                'average_resonance': np.mean([
+                    exp.get('neural_response', {}).get('emotional_resonance', 0.0)
+                    for exp in self.emotional_memory
+                ]) if self.emotional_memory else 0.0
+            }
         } 

@@ -238,6 +238,17 @@ class TrinityProcessor:
         # Update arbitration confidence
         if isinstance(result, dict) and 'confidence' in result:
             self.system_state['arbitration_confidence'] = result['confidence']
+        
+        # Update evolution level based on successful processing
+        if isinstance(result, dict) and 'error' not in result:
+            # Increment evolution level based on processing success and complexity
+            evolution_increment = 0.01 * (1.0 - complexity)  # More complex tasks lead to more evolution
+            self.evolution_level = min(1.0, self.evolution_level + evolution_increment)
+            
+            # Also update core evolution levels
+            self.logos.evolution_level = min(1.0, self.logos.evolution_level + evolution_increment)
+            self.pneuma.evolution_level = min(1.0, self.pneuma.evolution_level + evolution_increment)
+            self.ontos.evolution_level = min(1.0, self.ontos.evolution_level + evolution_increment)
     
     def _update_performance_metrics(self, result: Dict[str, Any]) -> None:
         """Update performance metrics with enhanced tracking"""
