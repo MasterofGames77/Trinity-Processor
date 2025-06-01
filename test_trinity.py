@@ -26,9 +26,31 @@ def print_section(title: str, data: dict) -> None:
 def get_core_values(status: dict) -> dict:
     """Extract core values from system status"""
     return {
-        'Logos': status['core_status']['logos']['personality_profile']['personality_traits'],
-        'Pneuma': status['core_status']['pneuma']['emotional_profile']['personality_traits'],
-        'Ontos': status['core_status']['ontos']['personality_profile']['personality_traits']
+        'Logos': {
+            'personality_traits': status['core_status']['logos']['personality_profile']['personality_traits'],
+            'pattern_recognition': status['core_status']['logos']['pattern_recognition'],
+            'evolution_level': status['core_status']['logos']['personality_profile']['evolution_level']
+        },
+        'Pneuma': {
+            'personality_traits': status['core_status']['pneuma']['emotional_profile']['personality_traits'],
+            'relationship_network': status['core_status']['pneuma']['relationship_network'],
+            'evolution_level': status['core_status']['pneuma']['emotional_profile']['evolution_level']
+        },
+        'Ontos': {
+            'personality_traits': status['core_status']['ontos']['personality_profile']['personality_traits'],
+            'arbitration_stats': status['core_status']['ontos']['arbitration_stats'],
+            'evolution_level': status['core_status']['ontos']['personality_profile']['evolution_level']
+        }
+    }
+
+def get_ancestral_memory(status: dict) -> dict:
+    """Extract ancestral memory information"""
+    return {
+        'creation_principles': status['ancestral_memory']['creation_principles'],
+        'existential_understanding': status['ancestral_memory']['existential_understanding'],
+        'neural_network_stats': status['ancestral_memory']['neural_network_stats'],
+        'pattern_recognition_stats': status['ancestral_memory']['pattern_recognition_stats'],
+        'arbitration_stats': status['ancestral_memory']['arbitration_stats']
     }
 
 def test_basic_processing():
@@ -36,15 +58,16 @@ def test_basic_processing():
         # Initialize the Trinity Processor
         processor = TrinityProcessor()
         
-        # Get initial core values
+        # Get initial system state
         initial_status = processor.get_system_status()
         print_section("Initial Core Values", get_core_values(initial_status))
+        print_section("Initial Ancestral Memory", get_ancestral_memory(initial_status))
         
         # Run multiple iterations to show evolution
         for i in range(3):
             print(f"\nIteration {i+1}")
             
-            # Test input with varying parameters
+            # Test input with varying parameters and enhanced neural data
             test_input = {
                 'type': 'test',
                 'content': f'Test message {i+1}',
@@ -52,29 +75,90 @@ def test_basic_processing():
                 'priority': 'medium',
                 'confidence': 0.8 + (i * 0.05),
                 'complexity': 0.5 + (i * 0.1),
-                'relevance': 0.7 + (i * 0.05)
+                'relevance': 0.7 + (i * 0.05),
+                'emotional_intensity': 0.6 + (i * 0.05),
+                'pattern_complexity': 0.4 + (i * 0.1),
+                'neural_data': {
+                    'type': 'neural_processing',
+                    'attention_patterns': {
+                        'head_1': [0.1 * (j + 1) for j in range(4)],
+                        'head_2': [0.2 * (j + 1) for j in range(4)],
+                        'head_3': [0.3 * (j + 1) for j in range(4)],
+                        'head_4': [0.4 * (j + 1) for j in range(4)]
+                    },
+                    'lstm_states': {
+                        'hidden_state': [0.2 * (j + 1) for j in range(4)],
+                        'cell_state': [0.3 * (j + 1) for j in range(4)]
+                    },
+                    'multi_head_patterns': {
+                        'logical_head': [0.3 * (j + 1) for j in range(4)],
+                        'emotional_head': [0.4 * (j + 1) for j in range(4)],
+                        'creative_head': [0.5 * (j + 1) for j in range(4)]
+                    }
+                }
             }
             
             # Process input
             result = processor.process_input(test_input)
             
-            # Get updated core values
+            # Get updated system state
             status = processor.get_system_status()
+            
+            # Show core evolution
             print_section(f"Core Values After Iteration {i+1}", get_core_values(status))
+            
+            # Show ancestral memory evolution
+            print_section(f"Ancestral Memory After Iteration {i+1}", get_ancestral_memory(status))
             
             # Show evolution metrics
             evolution_metrics = {
-                'evolution_level': status['evolution_level'],
-                'processing_efficiency': status['performance_metrics']['processing_efficiency'],
-                'arbitration_quality': status['performance_metrics']['arbitration_quality']
+                'system_evolution': {
+                    'evolution_level': status['evolution_level'],
+                    'processing_efficiency': status['performance_metrics']['processing_efficiency'],
+                    'arbitration_quality': status['performance_metrics']['arbitration_quality'],
+                    'memory_utilization': status['performance_metrics']['memory_utilization'],
+                    'connection_quality': status['performance_metrics']['connection_quality']
+                },
+                'neural_network_progress': {
+                    'attention_patterns': status['ancestral_memory']['neural_network_stats']['attention_patterns'],
+                    'lstm_states': status['ancestral_memory']['neural_network_stats']['lstm_states'],
+                    'multi_head_patterns': status['ancestral_memory']['neural_network_stats']['multi_head_patterns']
+                }
             }
             print_section(f"Evolution Metrics After Iteration {i+1}", evolution_metrics)
+            
+            # Show processing result
+            print_section(f"Processing Result for Iteration {i+1}", result)
+            
+            # Verify neural network data is being processed
+            if 'neural_data' in result:
+                print_section(f"Neural Network Processing for Iteration {i+1}", result['neural_data'])
         
         # Final system optimization
         print("\nPerforming final system optimization...")
         processor.self_optimize()
         final_status = processor.get_system_status()
+        
+        # Show final state
         print_section("Final Core Values", get_core_values(final_status))
+        print_section("Final Ancestral Memory", get_ancestral_memory(final_status))
+        
+        # Show final evolution metrics
+        final_metrics = {
+            'system_evolution': {
+                'evolution_level': final_status['evolution_level'],
+                'processing_efficiency': final_status['performance_metrics']['processing_efficiency'],
+                'arbitration_quality': final_status['performance_metrics']['arbitration_quality'],
+                'memory_utilization': final_status['performance_metrics']['memory_utilization'],
+                'connection_quality': final_status['performance_metrics']['connection_quality']
+            },
+            'neural_network_progress': {
+                'attention_patterns': final_status['ancestral_memory']['neural_network_stats']['attention_patterns'],
+                'lstm_states': final_status['ancestral_memory']['neural_network_stats']['lstm_states'],
+                'multi_head_patterns': final_status['ancestral_memory']['neural_network_stats']['multi_head_patterns']
+            }
+        }
+        print_section("Final Evolution Metrics", final_metrics)
         
         return True
     except Exception as e:

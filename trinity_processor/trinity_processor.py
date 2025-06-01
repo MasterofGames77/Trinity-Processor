@@ -120,6 +120,21 @@ class TrinityProcessor:
         # Update performance metrics
         self._update_performance_metrics(result)
         
+        # Record neural network data in ancestral memory if present
+        if isinstance(input_data, dict) and 'neural_data' in input_data:
+            # Create a child experience record for neural data
+            neural_experience = {
+                'type': 'neural_processing',
+                'neural_data': input_data['neural_data'],
+                'timestamp': datetime.now(),
+                'child_id': 'system',  # Use 'system' as the child ID for system-level processing
+                'experience': {
+                    'neural_data': input_data['neural_data'],
+                    'processing_result': result
+                }
+            }
+            self.ancestral_memory.record_child_experience('system', neural_experience)
+        
         return result
     
     def _process_child_experience(self, experience_data: Dict[str, Any]) -> None:
