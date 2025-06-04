@@ -5,6 +5,7 @@ from .cores.ontos import Ontos
 from .cores.logos import Logos
 from .cores.pneuma import Pneuma
 from .ancestral_memory import AncestralMemory
+from .feedback_system import FeedbackSystem
 
 class TrinityProcessor:
     def __init__(self):
@@ -37,12 +38,16 @@ class TrinityProcessor:
         # Initialize ancestral memory for wisdom accumulation
         self.ancestral_memory = AncestralMemory()
         
+        # Initialize feedback system
+        self.feedback_system = FeedbackSystem()
+        
         # Initialize performance metrics
         self.performance_metrics = {
             'processing_efficiency': 1.0,
             'memory_utilization': 0.0,
             'connection_quality': 0.0,
-            'arbitration_quality': 1.0
+            'arbitration_quality': 1.0,
+            'feedback_quality': 1.0  # New metric for feedback quality
         }
     
     def create_child_ai(self, child_config: Dict[str, Any]) -> str:
@@ -117,17 +122,21 @@ class TrinityProcessor:
         if isinstance(input_data, dict) and input_data.get('type') == 'child_experience':
             self._process_child_experience(input_data)
         
+        # Process feedback if present
+        if isinstance(input_data, dict) and 'feedback' in input_data:
+            feedback_result = self.feedback_system.process_feedback(input_data['feedback'])
+            self._integrate_feedback(feedback_result)
+        
         # Update performance metrics
         self._update_performance_metrics(result)
         
         # Record neural network data in ancestral memory if present
         if isinstance(input_data, dict) and 'neural_data' in input_data:
-            # Create a child experience record for neural data
             neural_experience = {
                 'type': 'neural_processing',
                 'neural_data': input_data['neural_data'],
                 'timestamp': datetime.now(),
-                'child_id': 'system',  # Use 'system' as the child ID for system-level processing
+                'child_id': 'system',
                 'experience': {
                     'neural_data': input_data['neural_data'],
                     'processing_result': result
@@ -217,7 +226,8 @@ class TrinityProcessor:
             },
             'external_connections': len(self.external_connections),
             'system_memory_size': len(self.system_memory),
-            'performance_metrics': self.performance_metrics
+            'performance_metrics': self.performance_metrics,
+            'feedback_system': self.feedback_system.get_feedback_stats()
         }
         
         # Add ancestral memory status
@@ -371,4 +381,63 @@ class TrinityProcessor:
             
             # Update trust level based on interaction history
             connection['trust_level'] = min(1.0,
-                connection['trust_level'] + 0.01 * (connection['interaction_count'] / 100)) 
+                connection['trust_level'] + 0.01 * (connection['interaction_count'] / 100))
+    
+    def _integrate_feedback(self, feedback_result: Dict[str, Any]) -> None:
+        """Integrate feedback results into the system"""
+        if 'error' in feedback_result:
+            logger.error(f"Error integrating feedback: {feedback_result['error']}")
+            return
+        
+        # Update core learning based on feedback
+        learning_signals = feedback_result.get('learning_signals', {})
+        
+        # Update Logos with pattern recognition feedback
+        if 'pattern_recognition' in learning_signals:
+            self.logos.evolve({
+                'type': 'feedback_learning',
+                'pattern_recognition': learning_signals['pattern_recognition']
+            })
+        
+        # Update Pneuma with emotional learning feedback
+        if 'emotional_learning' in learning_signals:
+            self.pneuma.evolve({
+                'type': 'feedback_learning',
+                'emotional_learning': learning_signals['emotional_learning']
+            })
+        
+        # Update Ontos with core adaptation feedback
+        if 'core_adaptation' in learning_signals:
+            self.ontos.evolve({
+                'type': 'feedback_learning',
+                'core_adaptation': learning_signals['core_adaptation']
+            })
+        
+        # Update performance metrics with feedback quality
+        if 'feedback_quality' in feedback_result:
+            self.performance_metrics['feedback_quality'] = feedback_result['feedback_quality']
+        
+        # Update meta-learning metrics
+        if 'meta_learning_metrics' in feedback_result:
+            self._update_meta_learning(feedback_result['meta_learning_metrics'])
+
+    def _update_meta_learning(self, meta_metrics: Dict[str, float]) -> None:
+        """Update meta-learning parameters based on feedback"""
+        # Update learning rates based on meta-learning metrics
+        if 'learning_efficiency' in meta_metrics:
+            self.feedback_system.learning_metrics['meta_learning_rate'] *= (
+                1.0 + 0.1 * meta_metrics['learning_efficiency']
+            )
+        
+        if 'adaptation_rate' in meta_metrics:
+            self.feedback_system.learning_metrics['cross_core_learning_rate'] *= (
+                1.0 + 0.1 * meta_metrics['adaptation_rate']
+            )
+        
+        if 'generalization_capacity' in meta_metrics:
+            self.feedback_system.learning_metrics['feedback_integration_rate'] *= (
+                1.0 + 0.1 * meta_metrics['generalization_capacity']
+            )
+        
+        # Optimize learning parameters
+        self.feedback_system.optimize_learning_parameters() 
