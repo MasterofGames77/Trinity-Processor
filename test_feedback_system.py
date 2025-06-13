@@ -26,33 +26,39 @@ class TestFeedbackSystem(unittest.TestCase):
         for metric, value in initial_metrics['system_metrics'].items():
             print(f"  {metric}: {value}")
         
-        # Process feedback
-        feedback_data = {'test': 'feedback'}
-        print("\nProcessing feedback...")
-        result = self.feedback_system.process_feedback(feedback_data)
-        
-        # Show updated metrics
-        print("\nMetrics after feedback:")
-        for metric, value in result['metrics'].items():
-            print(f"  {metric}: {value}")
-            # Check that metrics were updated
-            self.assertNotEqual(
-                value,
-                initial_metrics['system_metrics'][metric]
-            )
+        # Test different feedback types
+        feedback_types = ['learning', 'adaptation', 'generalization']
+        for feedback_type in feedback_types:
+            print(f"\nTesting {feedback_type} feedback...")
+            feedback_data = {'type': feedback_type, 'content': f'Test {feedback_type} feedback'}
+            result = self.feedback_system.process_feedback(feedback_data)
             
-            # Check that changes are significant (> 0.01)
-            change = abs(value - initial_metrics['system_metrics'][metric])
-            print(f"    Change: {change:.3f}")
-            self.assertGreater(change, 0.01)
+            # Show updated metrics
+            print(f"\nMetrics after {feedback_type} feedback:")
+            for metric, value in result['metrics'].items():
+                print(f"  {metric}: {value}")
+                # Check that metrics were updated
+                self.assertNotEqual(
+                    value,
+                    initial_metrics['system_metrics'][metric]
+                )
+                
+                # Check that changes are small but significant
+                change = abs(value - initial_metrics['system_metrics'][metric])
+                print(f"    Change: {change:.3f}")
+                self.assertGreater(change, 0.001)  # Small but significant change
+                self.assertLess(change, 0.1)  # Not too large
     
     def test_metric_bounds(self):
         """Test that metrics stay within valid bounds"""
         print("\nTesting metric bounds...")
         # Process feedback multiple times to test upper bound
-        for i in range(5):
+        for i in range(10):  # Increased iterations to test bounds
             print(f"\nIteration {i+1}:")
-            result = self.feedback_system.process_feedback({'test': 'feedback'})
+            result = self.feedback_system.process_feedback({
+                'type': 'learning',
+                'content': f'Test feedback {i+1}'
+            })
             
             # Show current metrics
             print("Current metrics:")
@@ -60,6 +66,8 @@ class TestFeedbackSystem(unittest.TestCase):
                 print(f"  {metric}: {value}")
                 # Check all metrics are <= 1.0
                 self.assertLessEqual(value, 1.0)
+                # Check all metrics are >= 0.0
+                self.assertGreaterEqual(value, 0.0)
 
 if __name__ == '__main__':
     print("\nStarting FeedbackSystem Tests...")

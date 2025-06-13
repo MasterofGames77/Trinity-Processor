@@ -147,8 +147,20 @@ class AncestralMemory:
 
             # Process different types of data with validation
             self._process_emotional_data(child_id, experience)
-            self._process_pattern_data(child_id, experience)
-            self._process_arbitration_data(child_id, experience)
+            
+            # Process pattern data if it exists in the experience or its nested data
+            if 'patterns' in experience:
+                self._process_pattern_data(child_id, experience)
+            elif 'experience' in experience and 'patterns' in experience['experience']:
+                self._process_pattern_data(child_id, experience['experience'])
+            
+            # Process arbitration data if it exists in the experience or its nested data
+            if 'decision' in experience:
+                self._process_arbitration_data(child_id, experience)
+            elif 'experience' in experience and 'decision' in experience['experience']:
+                self._process_arbitration_data(child_id, experience['experience'])
+            
+            # Process neural data
             self._process_neural_data(child_id, experience)
 
             # Update collective experiences
@@ -182,34 +194,34 @@ class AncestralMemory:
 
     def _process_pattern_data(self, child_id: str, experience: Dict[str, Any]) -> None:
         """Process pattern data with validation"""
-        if 'patterns' in experience:
-            try:
-                self.children[child_id]['pattern_memory'].append(
-                    experience['patterns']
-                )
+        try:
+            patterns = experience.get('patterns', {})
+            if patterns:  # Only process if we have pattern data
+                self.children[child_id]['pattern_memory'].append(patterns)
                 if child_id not in self.pattern_recognition_data:
                     self.pattern_recognition_data[child_id] = []
                 self.pattern_recognition_data[child_id].append({
                     'timestamp': datetime.now(),
-                    'patterns': experience['patterns']
+                    'patterns': patterns
                 })
-            except Exception as e:
-                logger.error(f"Error processing pattern data for child {child_id}: {str(e)}")
+                logger.info(f"Pattern data processed for child {child_id}")
+        except Exception as e:
+            logger.error(f"Error processing pattern data for child {child_id}: {str(e)}")
 
     def _process_arbitration_data(self, child_id: str, experience: Dict[str, Any]) -> None:
         """Process arbitration data with validation"""
-        if 'decision' in experience:
-            try:
-                self.children[child_id]['arbitration_memory'].append(
-                    experience['decision']
-                )
+        try:
+            decision = experience.get('decision', {})
+            if decision:  # Only process if we have decision data
+                self.children[child_id]['arbitration_memory'].append(decision)
                 self.arbitration_history.append({
                     'timestamp': datetime.now(),
                     'child_id': child_id,
-                    'decision': experience['decision']
+                    'decision': decision
                 })
-            except Exception as e:
-                logger.error(f"Error processing arbitration data for child {child_id}: {str(e)}")
+                logger.info(f"Arbitration data processed for child {child_id}")
+        except Exception as e:
+            logger.error(f"Error processing arbitration data for child {child_id}: {str(e)}")
 
     def _process_neural_data(self, child_id: str, experience: Dict[str, Any]) -> None:
         """Process neural network data with validation"""

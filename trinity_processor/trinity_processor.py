@@ -161,7 +161,14 @@ class TrinityProcessor:
         
         # Update pattern recognition
         if 'patterns' in experience:
-            self.logos._update_pattern_cache(experience['patterns'])
+            # Convert patterns to float values before updating cache
+            pattern_updates = {}
+            patterns_data = experience['patterns']
+            # Use pattern_confidence as the similarity value
+            if isinstance(patterns_data, dict) and 'pattern_confidence' in patterns_data:
+                pattern_type = patterns_data.get('pattern_type', 'unknown_pattern')
+                pattern_updates[pattern_type] = float(patterns_data['pattern_confidence'])
+            self.logos._update_pattern_cache(pattern_updates)
         
         # Update Ontos's arbitration capabilities
         if 'decision' in experience:

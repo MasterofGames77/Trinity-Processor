@@ -447,10 +447,13 @@ class Logos(BaseCore):
         """Update the pattern cache with new patterns"""
         for pattern, similarity in new_patterns.items():
             if pattern in self.pattern_cache:
+                # Ensure both values are floats before calculation
+                current_value = float(self.pattern_cache[pattern][0] if isinstance(self.pattern_cache[pattern], (list, tuple)) else self.pattern_cache[pattern])
+                new_value = float(similarity)
                 # Update existing pattern with weighted average
-                self.pattern_cache[pattern] = 0.7 * self.pattern_cache[pattern] + 0.3 * similarity
+                self.pattern_cache[pattern] = 0.7 * current_value + 0.3 * new_value
             else:
-                self.pattern_cache[pattern] = similarity
+                self.pattern_cache[pattern] = float(similarity)
     
     def _update_ethical_pattern_cache(self, new_patterns: Dict[str, float]) -> None:
         """Update ethical pattern cache with new patterns"""

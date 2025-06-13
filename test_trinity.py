@@ -63,13 +63,16 @@ def test_basic_processing():
         print_section("Initial Core Values", get_core_values(initial_status))
         print_section("Initial Ancestral Memory", get_ancestral_memory(initial_status))
         
+        # Use a consistent child_id for the test
+        child_id = "test_child"
+        
         # Run multiple iterations to show evolution
         for i in range(3):
             print(f"\nIteration {i+1}")
             
-            # Test input with varying parameters and enhanced neural data
-            test_input = {
-                'type': 'test',
+            # Test experience with pattern and decision data
+            test_experience = {
+                'type': 'test_experience',
                 'content': f'Test message {i+1}',
                 'safety': 'high',
                 'priority': 'medium',
@@ -78,6 +81,18 @@ def test_basic_processing():
                 'relevance': 0.7 + (i * 0.05),
                 'emotional_intensity': 0.6 + (i * 0.05),
                 'pattern_complexity': 0.4 + (i * 0.1),
+                'patterns': {
+                    'pattern_type': 'test_pattern',
+                    'pattern_confidence': 0.8 + (i * 0.05),
+                    'pattern_complexity': 0.6 + (i * 0.05),
+                    'pattern_relevance': 0.7 + (i * 0.05)
+                },
+                'decision': {
+                    'type': 'test_decision',
+                    'confidence': 0.85 + (i * 0.05),
+                    'impact': 'positive',
+                    'reasoning': 'test reasoning'
+                },
                 'neural_data': {
                     'type': 'neural_processing',
                     'attention_patterns': {
@@ -98,8 +113,8 @@ def test_basic_processing():
                 }
             }
             
-            # Process input
-            result = processor.process_input(test_input)
+            # Use the TrinityProcessor's receive_child_experience method
+            processor.receive_child_experience(child_id, test_experience)
             
             # Get updated system state
             status = processor.get_system_status()
@@ -127,12 +142,12 @@ def test_basic_processing():
             }
             print_section(f"Evolution Metrics After Iteration {i+1}", evolution_metrics)
             
-            # Show processing result
-            print_section(f"Processing Result for Iteration {i+1}", result)
+            # Show processing result (optional, since receive_child_experience does not return a result)
+            # print_section(f"Processing Result for Iteration {i+1}", result)
             
-            # Verify neural network data is being processed
-            if 'neural_data' in result:
-                print_section(f"Neural Network Processing for Iteration {i+1}", result['neural_data'])
+            # Verify neural network data is being processed (optional)
+            # if 'neural_data' in result:
+            #     print_section(f"Neural Network Processing for Iteration {i+1}", result['neural_data'])
         
         # Final system optimization
         print("\nPerforming final system optimization...")
