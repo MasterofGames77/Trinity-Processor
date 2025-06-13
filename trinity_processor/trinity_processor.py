@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+from venv import logger
 import numpy as np
 from .cores.ontos import Ontos
 from .cores.logos import Logos
