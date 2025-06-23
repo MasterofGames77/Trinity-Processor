@@ -143,6 +143,8 @@ class Pneuma(BaseCore):
     
     def process_input(self, input_data: Any) -> Any:
         """Process input using emotional and intuitive methods with neural network enhancement"""
+        # print(f"[DEBUG] Pneuma process_input called with: {type(input_data)}")
+        
         # Convert input to tensor format
         input_tensor = self._prepare_input_tensor(input_data)
         
@@ -175,6 +177,10 @@ class Pneuma(BaseCore):
             'emotional_resonance': emotional_resonance,
             'neural_response': neural_response
         })
+        
+        # print(f"[DEBUG] Pneuma about to call record_experience. Current processing_count: {self.performance_metrics['processing_count']}")
+        self.record_experience({'type': 'input', 'input_data': input_data})
+        # print(f"[DEBUG] Pneuma record_experience completed. New processing_count: {self.performance_metrics['processing_count']}")
         
         return {
             'emotional_analysis': emotional_analysis,
@@ -485,11 +491,15 @@ class Pneuma(BaseCore):
     def get_emotional_profile(self) -> Dict[str, Any]:
         """Get comprehensive emotional profile with neural network statistics"""
         return {
+            'name': self.name,
             'emotional_state': self.emotional_state,
             'personality_traits': self.personality_traits,
             'emotional_memory_size': len(self.emotional_memory),
             'relationship_network': self.relationship_network,
             'evolution_level': self.evolution_level,
+            'experience_count': len(self.experiences),
+            'performance_metrics': self.performance_metrics,
+            'creation_date': self.creation_date.isoformat(),
             'neural_network_stats': {
                 'total_experiences': len(self.emotional_memory),
                 'average_resonance': np.mean([

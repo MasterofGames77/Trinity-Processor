@@ -77,6 +77,8 @@ class Logos(BaseCore):
             'confidence': confidence
         })
         
+        self.record_experience({'type': 'input', 'input_data': input_data})
+        
         return {
             'analysis': analysis,
             'patterns': patterns,

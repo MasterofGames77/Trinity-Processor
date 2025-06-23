@@ -170,6 +170,8 @@ class Ontos(BaseCore):
             'arbitration_result': arbitration_result
         })
         
+        self.record_experience({'type': 'input', 'input_data': input_data})
+        
         return arbitration_result
     
     def _tensor_to_response(self, tensor: torch.Tensor, logos_response: Any, pneuma_response: Any) -> Dict[str, Any]:
